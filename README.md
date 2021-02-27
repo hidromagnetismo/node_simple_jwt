@@ -3,6 +3,9 @@
 
 Node simple JWT
 
+## Initial config, connection MongoDB, nodemon, models, controllers, 3 endpoint and api.rest client vscode.
+
+![Screenshot_2021-02-27_09-03-42](https://user-images.githubusercontent.com/6284869/109382942-4a9e6e80-78db-11eb-964a-2660592bf0ef.png)
 
 # Proteger base de datos con autenticación
 
