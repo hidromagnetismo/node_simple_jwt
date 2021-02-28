@@ -2,7 +2,7 @@
 // import test from 'jest';
 // import puppeteer from 'puppeteer';
 const { GET, POST } = require('./src/restClientPuppeteer');
-let __URL__, headers, body, response;
+let __URL__, headers, body, responseText, responseJSON;
 
 async function db () {
     const url = 'mongodb://root:123456@localhost:27017';
@@ -12,15 +12,32 @@ async function db () {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
-        console.log('Testing MongoClient is conected');
+        // console.log('Testing MongoClient is conected');
         return client.db('simpleJWT');
     } catch (e) {
         console.log(e);
     }
 }
 
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+}
 
+sleep(500);
 
+const DecodeJWT = token => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
+};
+
+const jwt_decode = require('jwt-decode');
 
 
 
@@ -93,13 +110,25 @@ test('Endpoint POST /signup, registro de usuario', async () => {
         "password": "123456",
     }
 
-    response = await POST(`${__URL__}/signup`, headers, body);
+    responseText = await POST(`${__URL__}/signup`, headers, body);
 
-    expect(response).toContain('Received');
+    responseJSON = JSON.parse(responseText);
+
+    expect(responseText).toContain('auth');
+    expect(responseJSON.auth).toBeTruthy();
+    expect(responseJSON.token).toBeDefined();
+
+    // console.log(responseJSON.token);
+    // console.log(DecodeJWT(responseJSON.token));
+    // console.log(jwt_decode(responseJSON.token));
+    // console.log(jwt_decode(responseJSON.token).id);
+    
+    expect(jwt_decode(responseJSON.token).id).toBeDefined();
 
     const db_result = await (await db()).collection('users').findOne({username: username});
-
     expect(db_result.username).toBe(username);
+
+    expect(db_result._id.toString()).toBe(jwt_decode(responseJSON.token).id);
     
 });
 
@@ -134,9 +163,9 @@ test('Endpoint POST /signin, login', async () => {
         "password": "123456"
     }
     
-    response = await POST(`${__URL__}/signin`, headers, body);
+    responseText = await POST(`${__URL__}/signin`, headers, body);
 
-    expect(response).toBe('"signin"');
+    expect(responseText).toBe('"signin"');
     
 });
 
@@ -176,9 +205,9 @@ test('Endpoint GET /me, perfil del usuario', async () => {
         'Content-Type': 'application/json'
     }
     
-    response = await GET(`${__URL__}/me`, headers);
+    responseText = await GET(`${__URL__}/me`, headers);
 
-    expect(response).toBe('"me"');
+    expect(responseText).toBe('"me"');
     
 });
 
