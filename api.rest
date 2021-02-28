@@ -56,11 +56,9 @@ POST {{__URL__}}/signup
 Content-Type: application/json
 
 {
+	"username": "natanael",
 	"email": "hidromagnetismo@gmail.com",
-	"password": "123456",
-	"nombre": "Natanael",
-	"apellidos": "Liscano",
-	"fechaNacimiento": "1989-03-23T05:00:00Z"
+	"password": "123456"
 }
 
 ###

@@ -4,6 +4,20 @@
 const { GET, POST } = require('./src/restClientPuppeteer');
 let __URL__, headers, body, response;
 
+async function db () {
+    const url = 'mongodb://root:123456@localhost:27017';
+    try {
+        const MongoClient = require('mongodb').MongoClient;
+        const client = await MongoClient.connect(url, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('Testing MongoClient is conected');
+        return client.db('simpleJWT');
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 
 
@@ -66,22 +80,26 @@ __URL__ = 'http://127.0.0.1:3000';
 
 
 test('Endpoint POST /signup, registro de usuario', async () => {
-    
+
     headers = {
         'Content-Type': 'application/json'
     }
-    
+
+    const username = `natanael ${parseInt(Date.now()/1000)}`;
+
     body = {
+        "username": username,
         "email": "hidromagnetismo@gmail.com",
         "password": "123456",
-        "nombre": "Natanael",
-        "apellidos": "Liscano",
-        "fechaNacimiento": "1989-03-23T05:00:00Z"
     }
-    
+
     response = await POST(`${__URL__}/signup`, headers, body);
 
-    expect(response).toBe('"signup"');
+    expect(response).toContain('Received');
+
+    const db_result = await (await db()).collection('users').findOne({username: username});
+
+    expect(db_result.username).toBe(username);
     
 });
 
