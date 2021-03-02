@@ -4,6 +4,7 @@ const router = Router();
 
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const verifyToken = require('./verifyToken');
 
 const User = require('../models/User');
 
@@ -25,21 +26,9 @@ router.post('/signup', async (req, res, next) => {
     res.json({auth: true, token});
 });
 
-router.get('/me', async (req, res, next) => {
-    
-    const token = req.headers['x-access-token'];
-
-    if (!token) {
-        return res.status(401).json({
-            auth: false,
-            message: 'No token provided'
-        });
-    }
-    
-    const decode = jwt.verify(token, config.secret);
-    
+router.get('/me', verifyToken, async (req, res, next) => {
     // const user = await User.findById(decode.id);
-    const user = await User.findById(decode.id, {password: false});
+    const user = await User.findById(req.userId, {password: false});
     if (!user) {
         return res.status(404).send('No user found');
     }
