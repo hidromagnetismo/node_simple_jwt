@@ -38,6 +38,7 @@ router.get('/me', async (req, res, next) => {
     
     const decode = jwt.verify(token, config.secret);
     
+    // const user = await User.findById(decode.id);
     const user = await User.findById(decode.id, {password: false});
     if (!user) {
         return res.status(404).send('No user found');
@@ -47,7 +48,23 @@ router.get('/me', async (req, res, next) => {
 });
 
 router.post('/signin', async (req, res, next) => {
-    res.json('signin');
+    const { email, password } = req.body;
+    const user = await User.findOne({email});
+    if (!user) {
+        return res.status(404).send("The email doesn't exist");
+    }
+
+    const validPassword = await user.validatePassword(password);
+    if (!validPassword) {
+        return res.status(401).json({auth: false, token: null});
+    }
+
+    const token = jwt.sign({id: user._id}, config.secret, {
+        expiresIn: 60 * 60 * 24
+    });
+
+    // res.json({auth: true});
+    res.json({auth: true, token});
 });
 
 module.exports = router;

@@ -2,6 +2,7 @@
 
 
 
+@__TIME__ = {{$timestamp}}
 
 
 
@@ -57,14 +58,22 @@ POST {{__URL__}}/signup
 Content-Type: application/json
 
 {
-	"username": "natanael {{$timestamp}}",
-	"email": "hidromagnetismo@gmail.com",
+	"username": "natanael {{__TIME__}}",
+	"email": "hidromagnetismo{{__TIME__}}@gmail.com",
 	"password": "123456"
 }
 
 ###
 
 @token__REGISTER__ = {{__REGISTER__.response.body.token}}
+@__EMAIL__ = {{__REGISTER__.request.body.email}}
+
+
+
+
+
+
+
 
 
 
@@ -106,10 +115,8 @@ Content-Type: application/json
 # 88          "8b,   ,aa  88            88     88  88                                                 
 # 88           `"Ybbd8"'  88            88     88  88                                                 
 
-@userID = 602d7456c5053e97fdca47c0
-
 ### Ver Perfil
-GET {{__URL__}}/me?id={{userID}}
+GET {{__URL__}}/me
 Content-Type: application/json
 x-access-token: {{token__REGISTER__}}
 
@@ -141,13 +148,21 @@ POST {{__URL__}}/signin
 Content-Type: application/json
 
 {
-	"email": "hidromagnetismo@gmail.com",
+	"email": "{{__EMAIL__}}",
 	"password": "123456"
 }
 
 ###
 
 @token__LOGIN__ = {{__LOGIN__.response.body.token}}
+
+
+
+
+
+
+
+
 
 
 
@@ -189,10 +204,8 @@ Content-Type: application/json
 # 88          "8b,   ,aa  88            88     88  88                  
 # 88           `"Ybbd8"'  88            88     88  88                  
 
-@userID = 602d7456c5053e97fdca47c0
-
 ### Ver Perfil
-GET {{__URL__}}/me?id={{userID}}
+GET {{__URL__}}/me
 Content-Type: application/json
 x-access-token: {{token__LOGIN__}}
 

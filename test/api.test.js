@@ -181,11 +181,53 @@ test('Endpoint POST /signup, registro de usuario', async () => {
 // 88          "8b,   ,aa  88            88     88  88                                                 
 // 88           `"Ybbd8"'  88            88     88  88                                                 
 
-//  .only
-//  .skip
+//      .only
+//      .skip
 describe('Endpoint GET /me, perfil del usuario luego de haberse registrado', () => {
 
     
+
+    //.only
+    //.skip
+    it('Default', async () => {
+        
+        // Obteniendo el Token 
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        const date = parseInt(Date.now()/1000);
+        const username = `Diosymar ${date}`;
+        body = {
+            "username": username,
+            "email": `diosy${date}@gmail.com`,
+            "password": "123456",
+        }
+        responseText = await POST(`${__URL__}/signup`, headers, body);
+        responseJSON = JSON.parse(responseText);
+
+        // Realizando petición con el token obtenido
+        headers = {
+            'Content-Type': 'application/json',
+            'x-access-token': responseJSON.token
+        }
+        responseText = await GET(`${__URL__}/me`, headers);
+        responseJSON = JSON.parse(responseText);
+
+        // Confirmando respuesta
+        expect(responseJSON._id).toBeDefined();
+        expect(responseJSON.username).toBeDefined();
+        expect(responseJSON.username).toBe(username);
+        expect(responseJSON.email).toBeDefined();
+
+
+        // important
+        expect(responseJSON.password).toBeUndefined();
+    
+    });
+
+
+
+
     //.only
     //.skip
     it('Si no se envia el token', async () => {
@@ -257,40 +299,6 @@ describe('Endpoint GET /me, perfil del usuario luego de haberse registrado', () 
     });
 
     
-    //.only
-    //.skip
-    it('Si se envia un token correcto', async () => {
-        
-        // Obteniendo el Token 
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        const date = parseInt(Date.now()/1000);
-        const username = `Diosymar ${date}`;
-        body = {
-            "username": username,
-            "email": `diosy${date}@gmail.com`,
-            "password": "123456",
-        }
-        responseText = await POST(`${__URL__}/signup`, headers, body);
-        responseJSON = JSON.parse(responseText);
-
-        // Realizando petición con el token obtenido
-        headers = {
-            'Content-Type': 'application/json',
-            'x-access-token': responseJSON.token
-        }
-        responseText = await GET(`${__URL__}/me`, headers);
-        responseJSON = JSON.parse(responseText);
-
-        // Confirmando respuesta
-        expect(responseJSON._id).toBeDefined();
-        expect(responseJSON.username).toBeDefined();
-        expect(responseJSON.username).toBe(username);
-        expect(responseJSON.email).toBeDefined();
-    
-    });
-
 
 });
 
@@ -319,42 +327,125 @@ describe('Endpoint GET /me, perfil del usuario luego de haberse registrado', () 
 //                            "Y8bbdP"                    
 
 
-//  .only
-//  .skip
-test.skip('Endpoint POST /signin, login', async () => {
-    
-    const date = parseInt(Date.now()/1000);
-    
-    const email = `creacioneskeila${date}@gmail.com`;
-    const password = 'ArturoMiGranAmor';
-    
-    // Guardando el usuario en MongoDB
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    body = {
-        "username": `Keila ${date}`,
-        email,
-        password,
-    }
-    responseText = await POST(`${__URL__}/signup`, headers, body);
-    responseJSON = JSON.parse(responseText);
+//      .only
+//      .skip
+describe('Endpoint POST /signin, login', () => {
 
-    const ID_Hackeado = jwt_decode(responseJSON.token).id
+    //.only
+    //.skip
+    it('Default', async () => {
+        
+        // Creando el usuario
+        const date = parseInt(Date.now()/1000);
+        const email = `creacioneskeila${date}@gmail.com`;
+        const password = 'ArturoMiGranAmor';
+        
+        // Registrando/guardando el usuario en MongoDB
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        body = {
+            "username": `Keila ${date}`,
+            email,
+            password,
+        }
+        responseText = await POST(`${__URL__}/signup`, headers, body);
+        responseJSON = JSON.parse(responseText);
 
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    body = {
-        email,
-        password
-    } 
-    
-    responseText = await POST(`${__URL__}/signin`, headers, body);
+        expect(responseText).toContain('auth');
+        expect(responseJSON.auth).toBeTruthy();
+        expect(responseJSON.token).toBeDefined();
 
-    expect(responseText).toBe('"signin"');
-    
+        // Realizamos el login con el usuario previamente registrado/guardado
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        body = {
+            email,
+            password
+        }
+        
+        responseText = await POST(`${__URL__}/signin`, headers, body);
+        responseJSON = JSON.parse(responseText);
+
+        // Chequeando respuesta
+        expect(responseText).toContain('auth');
+        expect(responseJSON.auth).toBeTruthy();
+        expect(responseJSON.token).toBeDefined();
+
+    });
+
+
+
+    //.only
+    //.skip
+    it("The email doesn't exist", async () => {
+        
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        const __NO_EXIST__ = 'no@existo.tld';
+
+        body = {
+            email: __NO_EXIST__,
+            password: '123'
+        }
+        responseText = await POST(`${__URL__}/signin`, headers, body);
+        expect(responseText).toContain("The email doesn't exist");
+
+    });
+
+
+
+    //.only
+    //.skip
+    it('Password is no valid', async () => {
+        
+        // Creando el usuario
+        const date = parseInt(Date.now()/1000);
+        const email = `creacioneskeila${date}@gmail.com`;
+        const password = 'ArturoMiGranAmor';
+        
+        // Registrando/guardando el usuario en MongoDB
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        body = {
+            "username": `Keila ${date}`,
+            email,
+            password,
+        }
+        responseText = await POST(`${__URL__}/signup`, headers, body);
+        responseJSON = JSON.parse(responseText);
+
+        expect(responseText).toContain('auth');
+        expect(responseJSON.auth).toBeTruthy();
+        expect(responseJSON.token).toBeDefined();
+
+        // Realizamos el login con el usuario previamente registrado/guardado
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        const __INCORRECT__ = 'SolorzanoMiGranAmor';
+        
+        body = {
+            email,
+            password: __INCORRECT__
+        }
+        
+        responseText = await POST(`${__URL__}/signin`, headers, body);
+        responseJSON = JSON.parse(responseText);
+
+        expect(responseJSON.auth).toBeFalsy();
+        expect(responseJSON.token).toBeNull();
+
+    });
+
+
+
 });
 
 
@@ -399,19 +490,64 @@ test.skip('Endpoint POST /signin, login', async () => {
 
 //  .only
 //  .skip
-test.skip('Endpoint GET /me, perfil del usuario luego de haberse logueado', async () => {
+test('Endpoint GET /me, perfil del usuario luego de haberse logueado', async () => {
+
+    // Creando el usuario
+    const date = parseInt(Date.now()/1000);
+    const username = `Keila ${date}`
+    const email = `creacioneskeila${date}@gmail.com`;
+    const password = 'ArturoMiGranAmor';
     
+    // Registrando/guardando el usuario en MongoDB
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    body = {
+        username,
+        email,
+        password,
+    }
+    responseText = await POST(`${__URL__}/signup`, headers, body);
+    responseJSON = JSON.parse(responseText);
+
+    expect(responseText).toContain('auth');
+    expect(responseJSON.auth).toBeTruthy();
+    expect(responseJSON.token).toBeDefined();
+
+    // Realizamos el login con el usuario previamente registrado/guardado
     headers = {
         'Content-Type': 'application/json'
     }
     
+    body = {
+        email,
+        password
+    }
+    
+    responseText = await POST(`${__URL__}/signin`, headers, body);
+    responseJSON = JSON.parse(responseText);
+
+    // Chequeando respuesta
+    expect(responseText).toContain('auth');
+    expect(responseJSON.auth).toBeTruthy();
+    expect(responseJSON.token).toBeDefined();
+
+    // Realizando petición con el token obtenido
+    headers = {
+        'Content-Type': 'application/json',
+        'x-access-token': responseJSON.token
+    }
     responseText = await GET(`${__URL__}/me`, headers);
     responseJSON = JSON.parse(responseText);
 
     // Confirmando respuesta
     expect(responseJSON._id).toBeDefined();
     expect(responseJSON.username).toBeDefined();
+    expect(responseJSON.username).toBe(username);
     expect(responseJSON.email).toBeDefined();
+
+    // important
+    expect(responseJSON.password).toBeUndefined();
 
 });
 
